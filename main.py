@@ -4,13 +4,16 @@ from conserv import connect_to_server
 from datetime import date,datetime
 from dotenv import load_dotenv
 import os
+import requests
+from pydantic import BaseModel
+
+
 
 # load variables from .env file
 load_dotenv()
 
 #Take my_id from .env file
 my_id = int(os.getenv("MYID"))
-
 # Take bot token from .env file
 bot_token = os.getenv("TOKEN")
 
@@ -20,37 +23,40 @@ con, cursor = connect_to_server()
 bot = telebot.TeleBot(bot_token, parse_mode=None)
 
 
+
+class Task(BaseModel):
+    user_id: int
+    message: str
+    date_received: None
+
+
 user_states = {}
 def addtoserv(message, data,userid):
+    data_to_send = {
+        "user_id" : userid,
+        "message" : message.text,
+        "date_received" : None
+    }
     if message.text == 'Отменить':
         del user_states[userid]
         bot.reply_to(message,'Добавление отменено!')
         return None
     try:
-        cursor.execute("INSERT INTO tasks (users_id,description, time) VALUES (%s,%s,%s)", (userid,message.text,data))
-        print('Задача успешно добавлена!')
-        bot.send_message(userid,'Ваша задача была успешно добавлена!')
+        response = requests.post('http://127.0.0.1:8000/add/tasks',json=data_to_send)
+        bot.send_message(userid,response.text)
     except Exception as e:
         print('Возникла ошибка: ', e)
 
 
 def delete_tasks(message,userid):
-    try:
-        task_index = int(message) - 1
-
-        cursor.execute("SELECT id FROM tasks WHERE users_id = %s", (userid,))
-        rows = cursor.fetchall()
-        if rows:
-            real_task_id = rows[task_index]  
-            cursor.execute("DELETE FROM tasks WHERE users_id = %s AND id = %s", (userid, real_task_id))
-            result = getfromserv(message,userid)
-            if not result:
-                bot.send_message(userid,'Все задачи удалены!')
-            bot.send_message(userid, result)
-        else:
-            bot.send_message(userid, 'Нет задач для удаления!')
-    except Exception as e:
-        print('Возникла ошибка при удалении задачи: ', e)
+    data_to_send = {
+        "user_id" : userid,
+        "message" : message.text,
+        "date_received" : None
+    }
+    response = requests.post('http://127.0.0.1:8000/delete/tasks',json=data_to_send)
+    bot.send_message(userid, response.text)
+    
 
 
 
@@ -77,18 +83,16 @@ def add_completed(message,userid):
         print('Возникла ошибка при удалении задачи: ', e)
 
 
-def getfromserv(mes, userid):
-    try:
-        cursor.execute("SELECT id, description FROM tasks WHERE users_id = %s", (userid,))
-        rows = cursor.fetchall()
-        if rows:
-            return '\n'.join([f'{index + 1}. {row[1]}' for index,row in enumerate(rows)])
-        else:
-            bot.reply_to(mes, 'Нет задач')
-         
-
-    except Exception as e:
-        print('Возникла ошибка в получении с сервера ', e)
+def getfromserv(mes):
+    user_id =  mes.from_user.id
+    data_to_send  = {
+        "userid": user_id
+    }
+    response = requests.get('http://127.0.0.1:8000/get/tasks/',params= data_to_send)
+    if response.status_code == 404:
+        bot.send_message(user_id,'Упс, у вас нет задач')
+    else:
+        bot.send_message(user_id,response.text)
 
 
 @bot.message_handler(commands=['start'])
@@ -124,14 +128,9 @@ def send_feedback(message):
     user_id = message.from_user.id
     if user_id != my_id:
         bot.reply_to(message, 'Вы не можете использовать эту команду')
-    else:
-        try:
-            cursor.execute("SELECT * FROM feedbacks2")
-            rows = cursor.fetchall()
-            result = '\n'.join([f'{str(row[0])}.  {str(row[1])}, {str(row[2])} \n' for row in rows])  
-            bot.send_message(my_id, result)  
-        except Exception as e:
-            bot.reply_to(message, 'Возникла ошибка при получении с сервера', e)
+    response = requests.get('http://127.0.0.1:8000/get/feedbacks')
+    bot.send_message(my_id,response.text)
+  
 
 @bot.message_handler()
 def showdata(message):
@@ -149,8 +148,7 @@ def showdata(message):
         bot.reply_to(message, 'Упс, не вижу вас в базе, напишите "/start" чтобы приступить к работе!')
         return
     if msg.lower() == 'список':
-        result = getfromserv(message,user_id)
-        bot.send_message(user_id, result)
+        getfromserv(message)
     
     if msg.lower() == '✅':
         try:

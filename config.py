@@ -14,3 +14,8 @@ db_host = os.getenv("db_host")
 db_user = os.getenv("db_user")
 db_password = os.getenv("db_password")
 db_name = os.getenv("db_name")
+
+
+
+def connect_sync_url():
+    return f'postgresql+psycopg2://{db_user}:{db_password}@{db_host}:5432/{db_name}'

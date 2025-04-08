@@ -9,7 +9,12 @@ Next, install all requirements with pip install -r requirements.txt
 
 After that you should run app by commands:
 
-python main.py     #    telegram bot
-uvicorn thrapi:app --reload   #    api to connect database with bot
+python main.py 
+
+this will launch telegram bot
+
+uvicorn thrapi:app --reload
+
+api to connect database with bot
 
 And you will be able to manage your task right in your telegram chat

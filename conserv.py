@@ -1,13 +1,6 @@
 import psycopg2
-from dotenv import load_dotenv
-import os
+from config import db_host,db_name,db_password,db_user
 
-load_dotenv()
-#take parametrs from .env file
-db_host = os.getenv("db_host")
-db_user = os.getenv("db_user")
-db_password = os.getenv("db_password")
-db_name = os.getenv("db_name")
 
 def connect_to_server(): 
     try:

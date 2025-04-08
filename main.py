@@ -1,21 +1,9 @@
 import telebot
-import psycopg2
 from conserv import connect_to_server
 from datetime import date,datetime
-from dotenv import load_dotenv
-import os
 import requests
 from pydantic import BaseModel
-
-
-
-# load variables from .env file
-load_dotenv()
-
-#Take my_id from .env file
-my_id = int(os.getenv("MYID"))
-# Take bot token from .env file
-bot_token = os.getenv("TOKEN")
+from config import my_id,bot_token
 
 
 

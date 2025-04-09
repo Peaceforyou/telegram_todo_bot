@@ -25,6 +25,4 @@ def take_data_orm(userid):
 
 
         
-        
-
-take_data_orm(589966291)        
+           

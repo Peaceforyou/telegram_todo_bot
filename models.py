@@ -1,6 +1,6 @@
 from database import Base
 from sqlalchemy.orm import Mapped,mapped_column
-from sqlalchemy import BIGINT,TEXT,ForeignKey,MetaData,DATE
+from sqlalchemy import BigInteger,TEXT,ForeignKey,MetaData,DATE
 
 
 metadata_obj = MetaData()
@@ -18,8 +18,8 @@ class tasks_orm(Base):
     __tablename__ = 'tasks'
     
     id: Mapped[int] = mapped_column(primary_key=True)    
-    users_id: Mapped[int] = mapped_column(ForeignKey('people.id',ondelete='CASCADE'))
-    description: Mapped[str]
+    users_id: Mapped[BigInteger] = mapped_column(ForeignKey('people.id',ondelete='CASCADE'))
+    description: Mapped[str | None]
     
     
 class feedbacks2_orm(Base):

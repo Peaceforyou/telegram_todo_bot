@@ -14,17 +14,17 @@ def insert_data_orm(userid,desc):
 
 
 #GET TASKS FROM SERV
-def take_data_orm():
+def take_data_orm(userid):
     with sesison_factory() as session:
-        # query = session.Select(tasks_orm)
-        query = select(tasks_orm)
+        query = (
+            select(tasks_orm).where(tasks_orm.users_id == userid)
+        )
         result = session.execute(query)
-        print(result.scalars().all())
-        for id,task in result.scalars():
-            print(f'Айди: {id}, Задача {task}\n')
-## пофиксить обработку запроса плюс попробовать поймать это через фастапи, то есть закоментировать
-## весь код и оставить только функцию для возврата данных
+        tasks = result.scalars().all()  
+        return tasks
+
+
         
         
 
-take_data_orm()        
+take_data_orm(589966291)        

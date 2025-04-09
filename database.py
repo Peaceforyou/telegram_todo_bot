@@ -8,7 +8,7 @@ sync_engine = create_engine(
     echo=True
 )
 
-sesison = sessionmaker(sync_engine)
+sesison_factory = sessionmaker(sync_engine)
 
 
 class Base(DeclarativeBase):

@@ -5,8 +5,9 @@ import requests
 from pydantic import BaseModel
 from config import my_id,bot_token
 
-
+#proverka raboti sqlalchemy
 con, cursor = connect_to_server() 
+
 bot = telebot.TeleBot(bot_token, parse_mode=None)
 
 
@@ -190,3 +191,4 @@ try:
     bot.infinity_polling()
 finally:
     con.close()
+    ...
